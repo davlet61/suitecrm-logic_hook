@@ -2,7 +2,7 @@
 Custom Logic hook from SuiteCRM to integrate with external private API
 
 
-## Warning :warning:
+## :warning: NB
 There are some things to be aware of when using this integration.
 
 * Composer is only for local development, since the actual application uses Symfony.
