@@ -7,13 +7,15 @@ class GetAccessToken {
   private $output;
   private $expires;
   private $tokens;
-  
-  private $app_key = '9e33d5d9-46df-42dc-9f9c-196ce48ed91f';
-  private $client_key = 'd23d7c8e-e068-4d03-bca6-ac5e8d026975';
-  public $url = 'https://api.glasserviceoslo.no/v1';
+  private $app_key;
+  private $client_key;
+  public $url;
    
   private function __construct()
-  {
+  { 
+    $this->app_key = getenv('APP_KEY');
+    $this->client_key = getenv('CLIENT_KEY');
+    $this->url = getenv('API_URL');
     $this->ch = curl_init();
     $this->curlopts = array(
       CURLOPT_URL => $this->url . '/oauth',

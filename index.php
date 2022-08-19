@@ -1,26 +1,6 @@
 <?php
 
-require_once 'functions.php';
-
-// class SendRequest_LogicHook
-//      {
-//        public function sendRequest($event, $arguments)
-//        {  
-//             $logger = LoggerManager::getLogger(); 
-//             $url = "https://api.glasserviceoslo.no/v1"; 
-//             $ch = curl_init();
-//             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//             curl_setopt($ch, CURLOPT_URL, $url);
-//             $output = curl_exec($ch);
-            
-//             if ($output === false) {
-//               $logger->fatal("Curl error: " . curl_error($ch));
-//             }
-//             $logger->debug('Output' . $output);
-//             curl_close($ch);
-//          }
-
-//      }
+require_once 'getTokens.php';
 
 class Requests {
   private $accessTokenInstance;
