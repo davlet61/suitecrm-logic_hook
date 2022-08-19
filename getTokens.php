@@ -1,5 +1,10 @@
 <?php
 
+require 'vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 class GetAccessToken {
   private static $instance = null;
   private $ch;
@@ -13,9 +18,9 @@ class GetAccessToken {
    
   private function __construct()
   { 
-    $this->app_key = getenv('APP_KEY');
-    $this->client_key = getenv('CLIENT_KEY');
-    $this->url = getenv('API_URL');
+    $this->app_key = $_ENV['APP_KEY'];
+    $this->client_key = $_ENV['CLIENT_KEY'];
+    $this->url = $_ENV['API_URL'];
     $this->ch = curl_init();
     $this->curlopts = array(
       CURLOPT_URL => $this->url . '/oauth',
