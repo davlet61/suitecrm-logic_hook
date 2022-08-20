@@ -1,9 +1,14 @@
 <?php
 
-require 'vendor/autoload.php';
+$currentEnv = $_SERVER['_'];
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
+if (!str_contains($currentEnv, 'doppler')) {
+  require_once 'vendor/autoload.php';
+
+  $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+  $dotenv->load();
+}
+
 
 class GetAccessToken {
   private static $instance = null;
@@ -18,9 +23,9 @@ class GetAccessToken {
    
   private function __construct()
   { 
-    $this->app_key = $_ENV['APP_KEY'];
-    $this->client_key = $_ENV['CLIENT_KEY'];
-    $this->url = $_ENV['API_URL'];
+    $this->app_key = $_SERVER['PO_APP_KEY'];
+    $this->client_key = $_SERVER['PO_CLIENT_KEY'];
+    $this->url = 'https://api.glasserviceoslo.no/v1';
     $this->ch = curl_init();
     $this->curlopts = array(
       CURLOPT_URL => $this->url . '/oauth',
@@ -79,6 +84,5 @@ class GetAccessToken {
     return $this->tokens;
   }
 }
-
 
 ?>
