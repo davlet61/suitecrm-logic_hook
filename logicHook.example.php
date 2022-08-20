@@ -7,8 +7,8 @@ class Requests {
     
  function getAccessTokens($log, $baseUrl)
   {
-    $app_key = '9e33d5d9-46df-42dc-9f9c-196ce48ed91f';
-    $client_key = 'd23d7c8e-e068-4d03-bca6-ac5e8d026975';
+    $app_key = $_SERVER['PO_APP_KEY'];
+    $client_key = $_SERVER['PO_CLIENT_KEY'];
     $ch = curl_init();
     $curlopts = array(
       CURLOPT_URL => $baseUrl . '/oauth',

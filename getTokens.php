@@ -25,7 +25,7 @@ class GetAccessToken {
   { 
     $this->app_key = $_SERVER['PO_APP_KEY'];
     $this->client_key = $_SERVER['PO_CLIENT_KEY'];
-    $this->url = 'https://api.glasserviceoslo.no/v1';
+    $this->url = 'http://localhost:3001/v1';
     $this->ch = curl_init();
     $this->curlopts = array(
       CURLOPT_URL => $this->url . '/oauth',
