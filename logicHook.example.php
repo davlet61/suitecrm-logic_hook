@@ -46,11 +46,24 @@ class Requests {
     return json_decode($output, true);
   }
 
+  function getCustomerByName($token, $name, $logger, $baseUrl)
+    {
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $baseUrl.'/customer');
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array("access_token: $token"));
+      $output = curl_exec($ch);
+      if ($output === false) {
+        $logger->fatal("Curl error: " . curl_error($ch));
+      }
+      curl_close($ch);
+      return json_decode($output, true);
+    }
+
 
    function addCustomerToPO($bean, $event, $arguments)
     { 
         $Logger = LoggerManager::getLogger(); 
-        $url = 'https://api.glasserviceoslo.no/v1';
+        $url = 'http://localhost:3001/v1';
     
         $tokens = self::getAccessTokens($Logger, $url);
         $accessToken = json_decode($tokens)->access_token;
