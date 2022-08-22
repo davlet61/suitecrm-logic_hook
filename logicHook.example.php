@@ -49,11 +49,17 @@ class Requests {
   function getCustomerByName($token, $name, $logger, $baseUrl)
     {
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, "$baseUrl/customer?name=$name");
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array("access_token: $token"));
+      $escapedParams = curl_escape($ch, $name);
+      $curlopts = array(
+          CURLOPT_URL => "$baseUrl/customers?name=$escapedParams",
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_HTTPHEADER => array("access_token: $token")
+        );
+      curl_setopt_array($ch, $curlopts);
       $output = curl_exec($ch);
+    
       if ($output === false) {
-        $logger->fatal("Curl error: " . curl_error($ch));
+        error_log("Curl error: " . curl_error($ch));
       }
       curl_close($ch);
       return json_decode($output, true);
@@ -78,7 +84,7 @@ class Requests {
           )
         );
 
-        $customerByName = getCustomerByName($accessToken, $bean->name, $Logger, $url);
+        $customerByName = self::getCustomerByName($accessToken, $bean->name, $Logger, $url);
         if ($customerByName->count > 0) {
           $customer['id'] = $customerByName->id;
         }
