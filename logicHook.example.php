@@ -1,6 +1,6 @@
 <?php
 
-if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
+// if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
 class Requests {
   
@@ -11,7 +11,7 @@ class Requests {
     $client_key = $_SERVER['PO_CLIENT_KEY'];
     $ch = curl_init();
     $curlopts = array(
-      CURLOPT_URL => $baseUrl . '/oauth',
+      CURLOPT_URL => "$baseUrl/oauth",
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
       CURLOPT_MAXREDIRS => 10,
@@ -36,7 +36,7 @@ class Requests {
  function refreshTokens($refreshToken, $logger, $baseUrl)
   {
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $baseUrl.'/oauth/refresh');
+    curl_setopt($ch, CURLOPT_URL, "$baseUrl/oauth/refresh");
     curl_setopt($ch, CURLOPT_HTTPHEADER, array("refresh_token: $refreshToken"));
     $output = curl_exec($ch);
     if ($output === false) {
@@ -49,7 +49,7 @@ class Requests {
   function getCustomerByName($token, $name, $logger, $baseUrl)
     {
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, $baseUrl.'/customer');
+      curl_setopt($ch, CURLOPT_URL, "$baseUrl/customer?name=$name");
       curl_setopt($ch, CURLOPT_HTTPHEADER, array("access_token: $token"));
       $output = curl_exec($ch);
       if ($output === false) {
@@ -69,7 +69,7 @@ class Requests {
         $accessToken = json_decode($tokens)->access_token;
 
         $customer = array(
-          'name' => 'Hello from Suite AS',
+          'name' => $bean->name,
           'emailAddress' => $bean->email,
           'mailAddress' => array(
               'address1' => $bean->billing_address_street,
@@ -77,6 +77,11 @@ class Requests {
               'city' => strtoupper($bean->billing_address_city),
           )
         );
+
+        $customerByName = getCustomerByName($accessToken, $bean->name, $Logger, $url);
+        if ($customerByName->count > 0) {
+          $customer['id'] = $customerByName->id;
+        }
     
         $curl = curl_init();
         $payload = json_encode($customer);
