@@ -46,10 +46,34 @@ function getCustomerByName($token, $name, $baseUrl)
   return json_decode($output, true);
 }
 
+function deleteCustomerById($token, $id, $baseUrl)
+{
+  $ch = curl_init();
+  $curlopts = array(
+      CURLOPT_URL => "$baseUrl/customers/$id",
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_CUSTOMREQUEST => "DELETE",
+      CURLOPT_HTTPHEADER => array("access_token: $token")
+    );
+  curl_setopt_array($ch, $curlopts);
+  $output = curl_exec($ch);
+  $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  if ($httpCode === 404) {
+    error_log("Curl error: " . json_decode($output)->error);
+  }
+  curl_close($ch);
+  return $httpCode;
+}
+
+
 $url = 'http://localhost:3001/v1';
-$as = 'A-B Transport AS';
+$as = 'testinghwe hwe2';
 
 $tokens = getAccessTokens($url);
 $tkn = $tokens->access_token;
+
 $res = getCustomerByName($tkn, $as, $url);
-print_r($res);
+$id = $res['data'][0]['id'];
+
+// $del = deleteCustomerById($tkn, $id, $url);
+print_r(json_decode($del));
