@@ -67,7 +67,7 @@ function deleteCustomerById($token, $id, $baseUrl)
 
 
 $url = 'http://localhost:3001/v1';
-$as = 'testinghwe hwe2';
+$as = 'Akkurat AS';
 
 $tokens = getAccessTokens($url);
 $tkn = $tokens->access_token;
@@ -76,4 +76,4 @@ $res = getCustomerByName($tkn, $as, $url);
 $id = $res['data'][0]['id'];
 
 // $del = deleteCustomerById($tkn, $id, $url);
-print_r(json_decode($del));
+file_put_contents('result.txt', print_r($res, true));
