@@ -169,7 +169,7 @@ class Requests
         function deleteCustomerFromPO($bean, $event, $arguments)
             { 
                 $Logger = LoggerManager::getLogger(); 
-                $url = 'https://api.glasserviceoslo.no/v1';
+                $url = $_SERVER['PO_URL'];
 
                 $tokens = self::getAccessTokens($Logger, $url);
                 $accessToken = $tokens->access_token;
