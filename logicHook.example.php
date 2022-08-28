@@ -7,8 +7,9 @@ class Requests
 
         function getAccessTokens($logger, $baseUrl)
             {
-                $app_key = "9e33d5d9-46df-42dc-9f9c-196ce48ed91f";
-                $client_key = "d23d7c8e-e068-4d03-bca6-ac5e8d026975";
+                $app_key = $_SERVER['PO_APP_KEY'];
+                $client_key = $_SERVER['PO_CLIENT_KEY'];
+
                 $ch = curl_init();
                 $curlopts = array(
                     CURLOPT_URL => "$baseUrl/oauth",
@@ -29,7 +30,7 @@ class Requests
                     $logger->fatal("Curl error: " . curl_error($ch));
                 }
                 curl_close($ch);
-                return $output;
+                return json_decode($output);
             }
 
 
@@ -43,7 +44,7 @@ class Requests
                     $logger->fatal("Curl error: " . curl_error($ch));
                 }
                 curl_close($ch);
-                return json_decode($output, true);
+                return json_decode($output);
             }
 
         function getCustomerByName($token, $name, $logger, $baseUrl)
@@ -88,15 +89,15 @@ class Requests
         function addCustomerToPO($bean, $event, $arguments)
             { 
                 $Logger = LoggerManager::getLogger(); 
-                $url = 'https://api.glasserviceoslo.no/v1';
+                $url = $_SERVER['PO_URL'];
 
                 $tokens = self::getAccessTokens($Logger, $url);
-                $accessToken = json_decode($tokens)->access_token;
+                $accessToken = $tokens->access_token;
                 $sea = new SugarEmailAddress;
                 $primary = $sea->getPrimaryAddress($bean);
 
                 $customer = array(
-                    "invoiceDeliveryType" => 0,
+                    "invoiceDeliveryType" => $primary ? 0 : 2,
                     "isVatFree" => false,
                     "invoiceEmailAddress" => $primary,
                     "invoiceEmailAddressCC" => "",
@@ -133,12 +134,14 @@ class Requests
                 );
 
                 $customerByName = self::getCustomerByName($accessToken, $bean->name, $Logger, $url);
-                if ($customerByName->count > 0) {
-                    $customer['id'] = $customerByName->id;
+
+                if ($customerByName['count'] > 0) {
+                    $customer['id'] = $customerByName['data'][0]['id'];
                 }
 
                 $curl = curl_init();
                 $payload = json_encode($customer);
+                $Logger->fatal($payload);
                 curl_setopt_array($curl, array(
                     CURLOPT_URL => "$url/customers",
                     CURLOPT_RETURNTRANSFER => true,
@@ -169,7 +172,7 @@ class Requests
                 $url = 'https://api.glasserviceoslo.no/v1';
 
                 $tokens = self::getAccessTokens($Logger, $url);
-                $accessToken = json_decode($tokens)->access_token;
+                $accessToken = $tokens->access_token;
 
                 $customerByName = self::getCustomerByName($accessToken, $bean->name, $Logger, $url);
                 $id = $customerByName['data'][0]['id'];
