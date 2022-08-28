@@ -106,6 +106,7 @@ class Requests
                     "since" => date('Y-m-j'),
                     "isPerson" => false,
                     "isActive" => true,
+                    "websiteUrl" => $bean->website,
                     'mailAddress' => array(
                         'address1' => $bean->billing_address_street,
                         'zipCode' => $bean->billing_address_postalcode,
@@ -126,7 +127,6 @@ class Requests
                 );
 
                 $customerByName = self::getCustomerByName($bean->name);
-                $this->logger->fatal("id: " . $customerByName['data'][0]['id']);
 
                 if ($customerByName['count'] > 0) {
                     $customer['id'] = $customerByName['data'][0]['id'];
