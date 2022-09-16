@@ -4,7 +4,6 @@ if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
 class Requests 
     {
-        private $output;
         private $expires;
         private $tokens;
         private $app_key;
@@ -17,8 +16,9 @@ class Requests
                 $this->logger = LoggerManager::getLogger();
                 $this->app_key = $_SERVER['PO_APP_KEY'];
                 $this->client_key = $_SERVER['PO_CLIENT_KEY'];
-                $this->url = $_SERVER['PO_URL'];
+                $this->url = $_SERVER['POWERAPI_URL'];
                 $ch = curl_init();
+                
                 $curlopts = array(
                     CURLOPT_URL => "$this->url/oauth",
                     CURLOPT_RETURNTRANSFER => true,
@@ -33,12 +33,12 @@ class Requests
                     ),
                 );
                 curl_setopt_array($ch, $curlopts);
-                $this->output = curl_exec($ch);
-                if ($this->output === false) {
-                    $this->logger->fatal("Curl error: " . curl_error($ch));
+                $output = curl_exec($ch);
+                if ($output === false) {
+                    $this->logger->fatal("39 => Curl error: " . curl_error($ch));
                 }
-                curl_close($this->ch);
-                $this->tokens = json_decode($this->output, true);
+                curl_close($ch);
+                $this->tokens = json_decode($output, true);
                 $this->expires = microtime(true) + $this->tokens['expires_in'];
             }
 
@@ -56,7 +56,7 @@ class Requests
                 $output = curl_exec($ch);
 
                 if ($output === false) {
-                    $this->logger->fatal("Curl error: " . curl_error($ch));
+                    $this->logger->fatal("59 => Curl error: " . curl_error($ch));
                 }
                 curl_close($ch);
                 return json_decode($output, true);
@@ -75,7 +75,7 @@ class Requests
                 $output = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 if ($httpCode === 404) {
-                    $this->logger->fatal("Curl error: " . json_decode($output)->error);
+                    $this->logger->fatal("78 => Curl error: " . json_decode($output)->error);
                 }
                 curl_close($ch);
                 return $httpCode;
@@ -151,7 +151,7 @@ class Requests
                 $output = curl_exec($curl);
 
                 if ($output === false) {
-                    $this->logger->fatal("Curl error: " . curl_error($curl));
+                    $this->logger->fatal("154 => Curl error: " . curl_error($curl));
                 }
                 curl_close($curl);
             }
@@ -168,7 +168,7 @@ class Requests
                 $res = self::deleteCustomerById($id);
 
                 if ($res === 400) {
-                    $this->logger->fatal("Curl error: $res");
+                    $this->logger->fatal("171 => Curl error: $res");
                 }
                 return $res;
             }
