@@ -89,10 +89,8 @@ class Requests
         public function addProductToPO(&$bean, $event, $arguments)
             { 
                 $accessToken = $this->tokens['access_token'];
-                $sea = new SugarEmailAddress;
-                $primary = $sea->getPrimaryAddress($bean);
                 
-                $customer = array(
+                $product = array(
                     "code" => $bean->maincode,
                     "name" => $bean->name,
                     "type" => $bean->type,
@@ -112,7 +110,7 @@ class Requests
                 }
 
                 $curl = curl_init();
-                $payload = json_encode($customer);
+                $payload = json_encode($product);
                 curl_setopt_array($curl, array(
                     CURLOPT_URL => "$this->url/poweroffice/products",
                     CURLOPT_RETURNTRANSFER => true,
@@ -130,7 +128,7 @@ class Requests
                 $output = curl_exec($curl);
 
                 if ($output === false) {
-                    $this->logger->fatal("133 => Curl error: " . curl_error($curl));
+                    $this->logger->fatal("131 => Curl error: " . curl_error($curl));
                 }
                 curl_close($curl);
             }
@@ -147,7 +145,7 @@ class Requests
                 $res = self::deleteProductById($id);
 
                 if ($res === 400) {
-                    $this->logger->fatal("150 => Curl error: $res");
+                    $this->logger->fatal("148 => Curl error: $res");
                 }
                 return $res;
             }
