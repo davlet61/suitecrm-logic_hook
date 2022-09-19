@@ -143,13 +143,11 @@ class Requests
 
                 $productByCode = self::getProductByCode($bean->maincode);
                 $id = $productByCode['data'][0]['id'];
-                
-                $this->logger->fatal($id);
 
                 $res = self::deleteProductById($id);
 
                 if ($res === 400) {
-                    $this->logger->fatal("151 => Curl error: $res");
+                    $this->logger->fatal("150 => Curl error: $res");
                 }
                 return $res;
             }
