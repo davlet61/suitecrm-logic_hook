@@ -92,7 +92,25 @@ class InvoiceRequests
                 }
                 curl_close($ch);
                 return json_decode($output, true);
-            }            
+            }
+            
+        private function getProductByCode($code)
+            {
+                $ch = curl_init();
+                $curlopts = array(
+                    CURLOPT_URL => "$this->url/poweroffice/products?code=$code",
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_HTTPHEADER => array("access_token: ".$this->tokens['access_token'])
+                );
+                curl_setopt_array($ch, $curlopts);
+                $output = curl_exec($ch);
+
+                if ($output === false) {
+                    $this->logger->fatal("109 => Curl error: " . curl_error($ch));
+                }
+                curl_close($ch);
+                return json_decode($output, true);
+            }
 
         // AFTER SAVE
         public function createInvoiceInPO(&$bean, $event, $arguments)
@@ -103,9 +121,7 @@ class InvoiceRequests
                 $name= $account->name ?? $contact->name;
                 $customer = self::getCustomerByName($name);
                 $customerCode = $customer['data'][0]['code'];
-                
-                
-                
+
                 // Create Customer in PO if no existing
                 if ($customer['count'] === 0) {
                     $customerData = array(
@@ -152,6 +168,7 @@ class InvoiceRequests
                 
                 $link = 'aos_products_quotes';
                 
+                // Add line items to the outgoing invoice
                 if ($bean->load_relationship($link)) {
                     $lineItems = $bean->$link->getBeans();
                     
@@ -164,21 +181,42 @@ class InvoiceRequests
                             "quantity" => $lineItem->product_qty,
                             "unitCost" => $lineItem->product_unit_price,
                             "unitPrice" => $lineItem->product_list_price,
-                            "vatRate" => $lineItem->vat ?? 25,
+                            "vatRate" => $lineItem->vat ? intval($lineItem->vat)/100 : 0.25,
                         );
                         array_push($items, $productItem);
                     }
                     
                 }
                 
+                // Add shipping to the invoice
+                if ($bean->shipping_amount > 0) {
+                    $frakt = array(
+                        "productCode" => 7,
+                        "quantity" => 1,
+                        "description" => "Frakt og avgifter",
+                        "unit" => "EA",
+                        "unitOfMeasureCode" => 5,
+                        "costPrice" => $bean->shipping_amount,
+                        "salesPrice" => $bean->shipping_amount,
+                        "vatCode" => 0.25,
+                    );
+                    array_push($items, $frakt);
+                }
+                
                 $invoice = array(
                     "invoiceDeliveryType" => 0,
                     "customerCode" => $customerCode,
+                    "customerEmail" => $account->email1,
+                    "deliveryAddress1" => $bean->billing_address_street,
+                    "deliveryAddressCity" => $bean->billing_address_city,
+                    "deliveryAddressZipCode" => $bean->billing_address_postalcode,
                     "totalAmount" => $bean->total_amount,
                     "paymentTerms" => 14,
                     "outgoingInvoiceLines" => $items,
                     "isInvoiceBeingProcessed" => false
                 );
+                
+                $this->logger->fatal($invoice);
 
                 $curl = curl_init();
                 $payload = json_encode($invoice);
@@ -201,12 +239,13 @@ class InvoiceRequests
                 $json = json_decode($output, true);
 
                 if (!$output) {
-                    $this->logger->fatal("204 => Curl error: " . curl_error($curl));
+                    $this->logger->fatal("242 => Curl error: " . curl_error($curl));
                 }
                 
                 if (!$json['success']) {
                     $this->logger->fatal($json);
                 }
+                
                 curl_close($curl);
             }
 
