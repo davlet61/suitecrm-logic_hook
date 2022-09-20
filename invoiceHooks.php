@@ -39,7 +39,7 @@ class InvoiceRequests
                 );
                 curl_setopt_array($ch, $curlopts);
                 $output = curl_exec($ch);
-                if ($output === false) {
+                if (!$output) {
                     $this->logger->fatal("43 => Curl error: " . curl_error($ch));
                 }
                 curl_close($ch);
@@ -60,7 +60,7 @@ class InvoiceRequests
                 $output = curl_exec($ch);
 
                 if ($output === false) {
-                    $this->logger->fatal("59 => Curl error: " . curl_error($ch));
+                    $this->logger->fatal("63 => Curl error: " . curl_error($ch));
                 }
                 curl_close($ch);
                 return json_decode($output, true);
@@ -87,7 +87,7 @@ class InvoiceRequests
                 curl_setopt_array($ch, $curlopts);
                 $output = curl_exec($ch);
 
-                if ($output === false) {
+                if (!$output) {
                     $this->logger->fatal("91 => Curl error: " . curl_error($ch));
                 }
                 curl_close($ch);
@@ -159,12 +159,12 @@ class InvoiceRequests
                         $product = BeanFactory::getBean('AOS_Products', $lineItem->product_id);
                         $productItem = array(
                             "description" => $lineItem->item_description,
-                            "discountPercent" => $lineItem->product_discount,
+                            "discountPercent" => intval($lineItem->product_discount)/100,
                             "productCode" => $product->maincode,
                             "quantity" => $lineItem->product_qty,
                             "unitCost" => $lineItem->product_unit_price,
                             "unitPrice" => $lineItem->product_list_price,
-                            "vatRate" => $lineItem->vat,
+                            "vatRate" => $lineItem->vat ?? 25,
                         );
                         array_push($items, $productItem);
                     }
@@ -182,7 +182,7 @@ class InvoiceRequests
 
                 $curl = curl_init();
                 $payload = json_encode($invoice);
-                curl_setopt_array($curl, array(
+                $curlopts = array(
                     CURLOPT_URL => "$this->url/poweroffice/invoices",
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_ENCODING => "",
@@ -195,11 +195,17 @@ class InvoiceRequests
                         "access_token: $accessToken",
                         "content-type: application/json",
                     ),
-                ));
+                );
+                curl_setopt_array($curl, $curlopts);
                 $output = curl_exec($curl);
+                $json = json_decode($output, true);
 
-                if ($output === false) {
-                    $this->logger->fatal("Curl error: " . curl_error($curl));
+                if (!$output) {
+                    $this->logger->fatal("204 => Curl error: " . curl_error($curl));
+                }
+                
+                if (!$json['success']) {
+                    $this->logger->fatal($json);
                 }
                 curl_close($curl);
             }
