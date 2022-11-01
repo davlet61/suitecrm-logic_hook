@@ -59,3 +59,5 @@ $dictionary[$module]['relationships'][strtolower($module).'_email_addresses_prim
     'relationship_role_column'=>'primary_address',
     'relationship_role_column_value'=>'1'
 );
+
+?>
