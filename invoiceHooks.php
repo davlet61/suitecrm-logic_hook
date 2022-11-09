@@ -174,8 +174,9 @@ class InvoiceRequests
                     
                     foreach ($lineItems as $lineItem) {
                         $product = BeanFactory::getBean('AOS_Products', $lineItem->product_id);
+                        $desc = $lineItem->item_description ? "$lineItem->name - $lineItem->item_description" : $lineItem->name;
                         $productItem = array(
-                            "description" => $lineItem->item_description,
+                            "description" => $desc,
                             "discountPercent" => intval($lineItem->product_discount)/100,
                             "productCode" => $product->maincode,
                             "quantity" => $lineItem->product_qty,
@@ -204,6 +205,7 @@ class InvoiceRequests
                 }
                 
                 $invoice = array(
+                    "purchaseOrderNo" => $bean->number,
                     "invoiceDeliveryType" => 0,
                     "customerCode" => $customerCode,
                     "customerEmail" => $account->email1,
@@ -216,7 +218,6 @@ class InvoiceRequests
                     "isInvoiceBeingProcessed" => false
                 );
                 
-                $this->logger->fatal($invoice);
 
                 $curl = curl_init();
                 $payload = json_encode($invoice);
