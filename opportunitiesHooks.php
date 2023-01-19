@@ -21,19 +21,19 @@ class SendNotifications
             }
       
         private function getMessage($stage)
-            {
+            {   
                 switch ($stage) {
-                  case 'Send Quote':
-                    return null;
+                    case 'Send_quote':
+                        return 'We have sent you a quote';
                   
-                  case 'Quote follow up':
-                    return 'We sent you a qoute a while ago, please do not hesitate to contact if you have any questions';
+                    case 'Quote_follow_up':
+                        return 'We have sent you a qoute a while ago, please do not hesitate to contact if you have any questions';
                   
-                  case 'Proforma':
-                    return 'We have now sent you a proforma invoice.';
+                    case 'Proforma':
+                        return 'We have now sent you a proforma invoice.';
 
-                  default:
-                    return null;
+                    default:
+                        return '';
                 }
             }
 
@@ -42,13 +42,13 @@ class SendNotifications
         public function notifyClient(&$bean, $event, $arguments)
             { 
 
-                // $message = self::getMessage($bean->sales_stage);
+                $message = self::getMessage($bean->sales_stage);
                 
                 $product = array(
                     "customerEmail" => $bean->maincode,
                     "name" => $bean->name,
                     "phone" => $bean->price,
-                    "message" => "any"
+                    "message" => $message
                 );
 
                 // $ch = curl_init();
