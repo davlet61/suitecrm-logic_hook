@@ -11,11 +11,64 @@ class actionTwilioAction extends actionBase
     
       public function loadJS() 
           {
-              $randomNumber = rand();
+              parent::loadJS();
+              return array();
+              // $randomNumber = rand();
           }
 
-      public function run_action(SugarBeand $bean, $params = array(), $in_save = false) 
-          {}
+      public function run_action(SugarBean $bean,$params = array(),$in_save = false)
+          {
+              $projectStatus = $bean->status;
+
+              $field = $bean->getFieldDefinition($params['related_module_name']);
+
+              $relateId = $field['id_name'];
+
+              if($projectStatus == "Completed"){
+
+              $relatedModule = BeanFactory::getBean($field['module'], $relateId);
+
+              $relatedFieldId = $relatedModule->$params['related_module_fields'];
+
+              $userBean = BeanFactory::getBean('Users', $relatedFieldId);
+
+              $email = $userBean->email1;
+
+              require_once('modules/Emails/Email.php');
+
+              require_once('include/SugarPHPMailer.php');
+
+              $emailObj = BeanFactory::newBean('Emails');
+
+              $defaults = $emailObj->getSystemDefaultEmail();
+
+              $mail = new SugarPHPMailer();
+
+              $mail->setMailerForSystem();
+
+              $mail->From = $defaults['email'];
+
+              isValidEmailAddress($mail->From);
+
+              $mail->FromName = $defaults['name'];
+
+              $mail->Subject = $emailSubject;
+
+              $mail->Body = $emailBody;
+
+              $mail->IsHTML(true);
+
+              $mail->prepForOutbound();
+
+              $mail->AddAddress($email);
+
+              $mail->Send();
+
+              }
+
+              return false;
+            
+          }         
 
       public function edit_display($line, SugarBean $bean = null, $params = array())
           {
