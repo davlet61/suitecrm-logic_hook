@@ -53,14 +53,14 @@ class Relationships
                 $relatedOpportunities = $bean->get_linked_beans('opportunities');
 
                 foreach ( $relatedContacts as $contact ) {
-        			$contact->mark_deleted($contact->id);
-        			$contact->save();
-        		}
+                  $contact->mark_deleted($contact->id);
+                  $contact->save();
+                }
         		
-        		foreach ( $relatedOpportunities as $opportunity ) {
-        			$opportunity->mark_deleted($opportunity->id);
-        			$opportunity->save();
-        		}
+                foreach ( $relatedOpportunities as $opportunity ) {
+                  $opportunity->mark_deleted($opportunity->id);
+                  $opportunity->save();
+                }
             }
             
     }
