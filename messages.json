@@ -1,0 +1,31 @@
+[
+  {
+    "stage": "Send_quote",
+    "message": "Hei, vi jobber nå med å utarbeide tilbud til deg. Dette kan ta noe tid avhengig av antall underleverandører og oppdrag. Vi setter pris på din tålmodighet."
+  },
+  {
+    "stage": "Quote_follow_up",
+    "message": "Hei, Vi har nå sendt tilbud til epost 'xxx' vennligst sjekk søppelpost/spam dersom du ikke finner den i innboksen. Hvis du mener at du ikke har mottatt tilbudet er det fint om du tar kontakt umiddelbart."
+  },
+  {
+    "stage": "Quote_follow_up",
+    "after_days": 15,
+    "message": "Hei, vi savner din bestutning. Nå er det ikke lenge igjen til tilbudet utgår. Vi setter stor pris på en tilbakemelding snarest."
+  },
+  {
+    "stage": "Proforma_invoice",
+    "message": "Hei, Vi takker for at du har valgt oss som leverandør. Du vil om kort tid motta faktura for forskuddsbetaling avhengig av kapasitet."
+  },
+  {
+    "stage": "Arrange_assignment",
+    "message": "Hei, vi har registrert din betaling. Vi vil nå bestille varen* fra leverandør. Dersom det er behov for kontrollmåling før ordre tar vi kontakt. Vi kommer tilbake til deg når vi har fått bekreftet leveringsdato. Dette kan ta noe tid avhengig av underleverandør. Vi setter pris på din tålmodighet!"
+  },
+  {
+    "stage": "Assignment",
+    "message": "Hei, Vi bekrefter vår avtale for montering. Vi kommer som avtalt men med forbehold om endringer av leveringsdato fra underleverandør. Vi vil ta kontakt dersom det er tilfelle."
+  },
+  {
+    "stage": "Final_invoice",
+    "message": "Hei, Takk for et godt samarbeid! Du vil om kort tid motta sluttfaktura for arbeidet avhengig av kapasitet. Ønsker deg lykke til med fremtidige prosjekter. Husk at vi er der for deg når du har behov for våre tjenester!"
+  }
+]

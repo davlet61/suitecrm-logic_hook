@@ -22,19 +22,19 @@ class SendNotifications
       
         private function getMessage($stage)
             {   
-                switch ($stage) {
-                    case 'Send_quote':
-                        return 'We have sent you a quote';
-                  
-                    case 'Quote_follow_up':
-                        return 'We have sent you a qoute a while ago, please do not hesitate to contact if you have any questions';
-                  
-                    case 'Proforma':
-                        return 'We have now sent you a proforma invoice.';
+                // Read the JSON file
+                $json = file_get_contents('messages.json');
 
-                    default:
-                        return '';
-                }
+                // Decode the JSON file
+                $messages = json_decode($json, true);
+                
+                $filtered = array_filter($messages, function($v) { 
+                    return strtolower($v['stage']) === strtolower($stage);
+                });
+
+                $msg = $filtered[0]['message'];
+
+                return $msg;
             }
 
 

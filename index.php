@@ -80,8 +80,19 @@ public function getCustomerList()
       }
     }
 
-    $requests = new Requests();
-    $newCustomer = $requests->addCustomerToPO();
-    print_r($newCustomer);
+    // Read the JSON file 
+    $json = file_get_contents('messages.json');
+
+    // Decode the JSON file
+    $messages = json_decode($json, true);
+
+    // $filtered = array_filter($messages, fn($v) => $v['stage'] === 'Send_quote');
+    $filtered = array_filter($messages, function($v) { 
+      return strtolower($v['stage']) === strtolower('Send_quote');
+  });
+
+    $msg = $filtered[0]['message'];
+
+    print_r($msg);
 
 ?>
