@@ -5,10 +5,10 @@
   },
   {
     "stage": "Quote_follow_up",
-    "message": "Hei, Vi har nå sendt tilbud til epost 'xxx' vennligst sjekk søppelpost/spam dersom du ikke finner den i innboksen. Hvis du mener at du ikke har mottatt tilbudet er det fint om du tar kontakt umiddelbart."
+    "message": "Hei, Vi har nå sendt tilbud til epost example@example.com vennligst sjekk søppelpost/spam dersom du ikke finner den i innboksen. Hvis du mener at du ikke har mottatt tilbudet er det fint om du tar kontakt umiddelbart."
   },
   {
-    "stage": "Quote_follow_up",
+    "stage": "Quote_flwp",
     "after_days": 15,
     "message": "Hei, vi savner din bestutning. Nå er det ikke lenge igjen til tilbudet utgår. Vi setter stor pris på en tilbakemelding snarest."
   },
@@ -18,7 +18,7 @@
   },
   {
     "stage": "Arrange_assignment",
-    "message": "Hei, vi har registrert din betaling. Vi vil nå bestille varen* fra leverandør. Dersom det er behov for kontrollmåling før ordre tar vi kontakt. Vi kommer tilbake til deg når vi har fått bekreftet leveringsdato. Dette kan ta noe tid avhengig av underleverandør. Vi setter pris på din tålmodighet!"
+    "message": "Hei, Vi har registrert din betaling. Vi vil nå bestille varen* fra leverandør. Dersom det er behov for kontrollmåling før ordre tar vi kontakt. Vi kommer tilbake til deg når vi har fått bekreftet leveringsdato. Dette kan ta noe tid avhengig av underleverandør. Vi setter pris på din tålmodighet!"
   },
   {
     "stage": "Assignment",
