@@ -205,7 +205,7 @@ class InvoiceRequests
                 }
                 
                 $invoice = array(
-                    "purchaseOrderNo" => $bean->number,
+                    "purchaseOrderNo" => $bean->quote_number,
                     "invoiceDeliveryType" => 0,
                     "customerCode" => $customerCode,
                     "customerEmail" => $account->email1,
