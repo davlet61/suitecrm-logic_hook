@@ -2,7 +2,7 @@
 
 if (!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
-//require_once('modules/EmailTemplates/EmailTemplate.php');
+require_once('modules/EmailTemplates/EmailTemplate.php');
 
 use Symfony\Component\Dotenv\Dotenv;
 
@@ -38,17 +38,36 @@ class SendNotifications
 
                 return "$msg \nMvh Glass.no";
             }
+            
 
+        private function getEmailTemplate($stage, $accountId)
+            {   
+                $template = new EmailTemplate();
+                $tilbud = $template->retrieve_by_string_fields(array('name' => 'Tilbud','type'=>'email'));
+                
+                $beanArray = ['Accounts' => $accountId];
+
+                $subject = $template->parse_template($template->subject, $beanArray);
+                $body = $template->parse_template($template->body, $beanArray);
+                $this->logger->fatal($body);
+            }
 
         // AFTER SAVE
         public function notifyClient(&$bean, $event, $arguments)
-            {   
+            {            
+                // Check if the processed_stage is equal to the current stage
+                if ($bean->processed_stage_c === $bean->sales_stage) {
+                    return;
+                }
+
                 $relatedAccounts = $bean->get_linked_beans('accounts');
                 
                 $sea = new SugarEmailAddress;
                 $primary = $sea->getPrimaryAddress($relatedAccounts[0]);
 
                 $message = self::getMessage($bean->sales_stage, $primary);
+                
+                // $tmp = self::getEmailTemplate($bean->sales_stage, $relatedAccounts[0]->id);
                 
                 if(strlen($message) < 15) {
                   return $this->logger->fatal($bean->name . ': No message' . " -> $bean->sales_stage");
@@ -81,9 +100,12 @@ class SendNotifications
                 $output = curl_exec($ch);
 
                 if ($output === false) {
-                    $this->logger->fatal("SendNotifications: 82 => Curl error: " . curl_error($ch));
+                    $this->logger->fatal("SendNotifications: 103 => Curl error: " . curl_error($ch));
                 }
                 curl_close($ch);
+                
+                $bean->processed_stage_c = $bean->sales_stage;
+                $bean->save();
             }
 
     }
