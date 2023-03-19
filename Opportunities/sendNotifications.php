@@ -51,6 +51,7 @@ class SendNotifications
                 $body = $template->parse_template($template->body, $beanArray);
                 $this->logger->fatal($body);
             }
+      
 
         // AFTER SAVE
         public function notifyClient(&$bean, $event, $arguments)
@@ -70,7 +71,8 @@ class SendNotifications
                 // $tmp = self::getEmailTemplate($bean->sales_stage, $relatedAccounts[0]->id);
                 
                 if(strlen($message) < 15) {
-                  return $this->logger->fatal($bean->name . ': No message' . " -> $bean->sales_stage");
+                  return;
+                  // $this->logger->fatal($bean->name . ': No message' . " -> $bean->sales_stage");
                 }
                 
                 $body = array(
