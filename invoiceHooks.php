@@ -22,12 +22,21 @@ class InvoiceRequests
                 $this->app_key = $_ENV['PO_APP_KEY'];
                 $this->client_key = $_ENV['PO_CLIENT_KEY'];
                 $this->url = $_ENV['POWERAPI_URL'];
+
+                // Set default encoding to UTF-8
+                mb_internal_encoding('UTF-8');
+
+                $this->authenticate();
+            }
+  
+      	private function authenticate()
+            {
                 $ch = curl_init();
-                
+
                 $curlopts = array(
                     CURLOPT_URL => "$this->url/poweroffice/oauth",
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_ENCODING => "",
+                    CURLOPT_ENCODING => "UTF-8",
                     CURLOPT_MAXREDIRS => 10,
                     CURLOPT_TIMEOUT => 30,
                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
@@ -35,32 +44,49 @@ class InvoiceRequests
                     CURLOPT_HTTPHEADER => array(
                         "application_key: $this->app_key",
                         "client_key: $this->client_key",
+                        "Content-Type: application/json; charset=UTF-8"
                     ),
                 );
                 curl_setopt_array($ch, $curlopts);
                 $output = curl_exec($ch);
                 if (!$output) {
-                    $this->logger->fatal("43 => Curl error: " . curl_error($ch));
+                    $this->logger->fatal("Authentication error: " . curl_error($ch));
                 }
                 curl_close($ch);
                 $this->tokens = json_decode($output, true);
                 $this->expires = microtime(true) + $this->tokens['expires_in'];
             }
+  
+      	private function sanitizeString($string)
+            {
+                // Convert to UTF-8 if not already
+                if (!mb_check_encoding($string, 'UTF-8')) {
+                    $string = mb_convert_encoding($string, 'UTF-8', mb_detect_encoding($string));
+                }
+
+                // Remove or replace unsupported characters
+                $string = preg_replace('/[^\p{L}\p{N}\s]/u', '', $string);
+
+                return $string;
+            }
 
         private function getCustomerByName($name)
             {
                 $ch = curl_init();
-                $escapedParams = curl_escape($ch, $name);
+                $escapedParams = curl_escape($ch, $this->sanitizeString($name));
                 $curlopts = array(
                     CURLOPT_URL => "$this->url/poweroffice/customers?name=$escapedParams",
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_HTTPHEADER => array("access_token: ".$this->tokens['access_token'])
+                    CURLOPT_HTTPHEADER => array(
+                        "access_token: ".$this->tokens['access_token'],
+                        "Content-Type: application/json; charset=UTF-8"
+                    )
                 );
                 curl_setopt_array($ch, $curlopts);
                 $output = curl_exec($ch);
 
                 if ($output === false) {
-                    $this->logger->fatal("63 => Curl error: " . curl_error($ch));
+                    $this->logger->fatal("getCustomerByName error: " . curl_error($ch));
                 }
                 curl_close($ch);
                 return json_decode($output, true);
@@ -73,22 +99,22 @@ class InvoiceRequests
                 $curlopts = array(
                     CURLOPT_URL => "$this->url/poweroffice/customers",
                     CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_ENCODING => "",
+                    CURLOPT_ENCODING => "UTF-8",
                     CURLOPT_MAXREDIRS => 10,
                     CURLOPT_TIMEOUT => 30,
                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                     CURLOPT_CUSTOMREQUEST => "POST",
-                    CURLOPT_POSTFIELDS => $data,
+                    CURLOPT_POSTFIELDS => json_encode($data, JSON_UNESCAPED_UNICODE),
                     CURLOPT_HTTPHEADER => array(
                         "access_token: $accessToken",
-                        "content-type: application/json",
+                        "Content-Type: application/json; charset=UTF-8",
                     )
                 );
                 curl_setopt_array($ch, $curlopts);
                 $output = curl_exec($ch);
 
                 if (!$output) {
-                    $this->logger->fatal("91 => Curl error: " . curl_error($ch));
+                    $this->logger->fatal("createCustomer error: " . curl_error($ch));
                 }
                 curl_close($ch);
                 return json_decode($output, true);
@@ -118,9 +144,9 @@ class InvoiceRequests
                 $accessToken = $this->tokens['access_token'];
                 $account = BeanFactory::getBean('Accounts', $bean->billing_account_id);
                 $contact = BeanFactory::getBean('Contacts', $bean->billing_contact_id);
-                $name= $account->name ?? $contact->name;
-                $customer = self::getCustomerByName($name);
-                $customerCode = $customer['data'][0]['code'];
+                $name = $this->sanitizeString($account->name ?? $contact->name);
+                $customer = $this->getCustomerByName($name);
+                $customerCode = $customer['data'][0]['code'] ?? null;
 
                 // Create Customer in PO if no existing
                 if ($customer['count'] === 0) {
@@ -136,32 +162,30 @@ class InvoiceRequests
                         "reminderEmailAddress" => "",
                         "transferToDebtCollectionAgency" => true,
                         "useInvoiceFee" => true,
-                        "name" => $account->name,
+                        "name" => $this->sanitizeString($account->name),
                         "vatNumber" => $account->phone_fax,
                         "since" => date('Y-m-j'),
                         "isPerson" => false,
                         "isActive" => true,
                         'mailAddress' => array(
-                            'address1' => $account->billing_address_street,
+                            'address1' => $this->sanitizeString($account->billing_address_street),
                             'zipCode' => $account->billing_address_postalcode,
-                            'city' => strtoupper($account->billing_address_city),
+                            'city' => $this->sanitizeString(strtoupper($account->billing_address_city)),
                         ),
                         "streetAddress" => array(
-                            'address1' => $account->shipping_address_street,
+                            'address1' => $this->sanitizeString($account->shipping_address_street),
                             'zipCode' => $account->shipping_address_postalcode,
-                            'city' => strtoupper($account->shipping_address_city),
+                            'city' => $this->sanitizeString(strtoupper($account->shipping_address_city)),
                         ),
                         "streetAddresses" => array(),
-                        "emailAddress" => $primary,
+                        "emailAddress" => $account->email1,
                         "isArchived" => false,
                         "phoneNumber" => $account->phone_office,
                         "contactGroups" => array()
                     );
-                    
-                    $payload = json_encode($customerData);
-                    
-                    $poCustomer = self::createCustomer($payload);
-                    $customerCode = $poCustomer['data']['code'];
+
+                    $poCustomer = $this->createCustomer($customerData);
+                    $customerCode = $poCustomer['data']['code'] ?? null;
                 }
                 
                 $items = array();
